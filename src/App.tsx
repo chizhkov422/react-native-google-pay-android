@@ -1,18 +1,44 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-google-pay-android';
+import { StyleSheet, View, Text, Pressable } from 'react-native';
+import {
+  setEnvironment,
+  isReadyToPay,
+  EEnvironment,
+} from 'react-native-google-pay-android';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
+  const [isReadyGooglePay, setIsReadyGooglePay] =
+    React.useState<boolean>(false);
+
+  const func = async () => {
+    setEnvironment(EEnvironment.ENVIRONMENT_PRODUCTION);
+
+    const isReady = await isReadyToPay(
+      ['MASTERCARD', 'VISA'],
+      ['PAN_ONLY', 'CRYPTOGRAM_3DS']
+    );
+
+    console.log('isReady: ', isReady);
+
+    setIsReadyGooglePay(isReady);
+  };
 
   React.useEffect(() => {
-    multiply(3, 7).then(setResult);
+    func();
   }, []);
+
+  const onPressGooglePay = () => {};
 
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>isReadyGooglePay: {isReadyGooglePay}</Text>
+
+      {isReadyGooglePay && (
+        <Pressable style={styles.googlePayButton} onPress={onPressGooglePay}>
+          <Text style={styles.googlePayButtonText}>Google Pay</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -23,9 +49,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
+  googlePayButton: {
+    marginTop: 20,
+    width: 100,
+    height: 30,
+    backgroundColor: 'red',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  googlePayButtonText: {
+    color: 'black',
   },
 });
